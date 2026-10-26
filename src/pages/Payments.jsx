@@ -34,7 +34,22 @@ export default function Payments() {
     { key: 'tier', label: 'Tier', render: (r) => `${r.tier} · ${r.months}m` },
     { key: 'provider', label: 'Provider', render: (r) => r.provider || '—' },
     { key: 'amount_brl', label: 'Valor', render: (r) => `${money(r.amount_brl)} ${r.currency || 'BRL'}` },
+    {
+      key: 'access_ends_at',
+      label: 'Acesso até',
+      render: (r) => <span className="mono">{when(r.access_ends_at || r.user_access_ends_at)}</span>,
+    },
+    {
+      key: 'user_plan_status',
+      label: 'Plano user',
+      render: (r) => <StatusBadge status={r.user_plan_status || r.status} />,
+    },
     { key: 'stripe_session_id', label: 'Session', render: (r) => <span className="mono">{r.stripe_session_id || '—'}</span> },
+    {
+      key: 'stripe_subscription_id',
+      label: 'Subscription',
+      render: (r) => <span className="mono">{r.stripe_subscription_id || r.user_subscription_id || '—'}</span>,
+    },
     { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const checkoutCols = [
@@ -44,12 +59,18 @@ export default function Payments() {
     { key: 'amount_total', label: 'Valor', render: (r) => cents(r.amount_total, r.currency) },
     { key: 'payment_status', label: 'Pagamento', render: (r) => <StatusBadge status={r.payment_status || r.status || '—'} /> },
     { key: 'fulfilled_at', label: 'Fulfill', render: (r) => (r.fulfilled_at ? <span className="mono">{when(r.fulfilled_at)}</span> : '—') },
+    {
+      key: 'user_access_ends_at',
+      label: 'Acesso user',
+      render: (r) => <span className="mono">{when(r.user_access_ends_at)}</span>,
+    },
     { key: 'id', label: 'Session', render: (r) => <span className="mono">{r.id}</span> },
   ];
   const eventCols = [
     { key: 'created_at', label: 'Quando', render: (r) => <span className="mono">{when(r.created_at)}</span> },
     { key: 'type', label: 'Evento', render: (r) => <span className="mono">{r.type}</span> },
     { key: 'object_id', label: 'Objeto', render: (r) => <span className="mono">{r.object_id || '—'}</span> },
+    { key: 'user_id', label: 'User', render: (r) => <span className="mono">{r.user_id || '—'}</span> },
     { key: 'processed_at', label: 'Processado', render: (r) => (r.processed_at ? <span className="mono">{when(r.processed_at)}</span> : '—') },
     { key: 'process_error', label: 'Erro', render: (r) => (r.process_error ? <span className="err">{r.process_error}</span> : 'ok') },
   ];
@@ -72,7 +93,9 @@ export default function Payments() {
   return (
     <section>
       <h1 className="page-title">Pagamentos</h1>
-      <p className="page-lead">Stripe checkouts, webhooks, compras e produção.</p>
+      <p className="page-lead">
+        Auditoria Stripe: checkouts, webhooks, compras creditadas (duração e acesso) e produção.
+      </p>
       {loading ? <Loading /> : null}
       {error ? <Err error={error} /> : null}
       {!loading && !error ? (
