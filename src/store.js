@@ -21,12 +21,16 @@ export const adminApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Overview', 'Prompts', 'Users', 'Purchases', 'Stripe', 'Outbound', 'Help', 'Jobs', 'Messages'],
+  tagTypes: ['Overview', 'Prompts', 'Users', 'Purchases', 'Stripe', 'Outbound', 'Help', 'Jobs', 'Messages', 'Contact'],
   endpoints: (build) => ({
     overview: build.query({ query: () => '/overview', providesTags: ['Overview'] }),
     prompts: build.query({
-      query: ({ status = '', q = '', bad = false, offset = 0, limit = 50 } = {}) => {
-        const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+      query: ({ status = '', q = '', bad = false, page = 1, limit = 50, offset } = {}) => {
+        const params = new URLSearchParams({
+          limit: String(limit),
+          page: String(page),
+        });
+        if (offset != null) params.set('offset', String(offset));
         if (status) params.set('status', status);
         if (q) params.set('q', q);
         if (bad) params.set('bad', '1');
@@ -67,6 +71,14 @@ export const adminApi = createApi({
       },
       providesTags: ['Help'],
     }),
+    contact: build.query({
+      query: ({ status = '' } = {}) => {
+        const params = new URLSearchParams({ limit: '80' });
+        if (status) params.set('status', status);
+        return `/contact?${params}`;
+      },
+      providesTags: ['Contact'],
+    }),
     jobs: build.query({
       query: ({ status = '' } = {}) => {
         const params = new URLSearchParams({ limit: '80' });
@@ -91,6 +103,7 @@ export const {
   useCancellationsQuery,
   useOutboundQuery,
   useHelpQuery,
+  useContactQuery,
   useJobsQuery,
   useMessagesQuery,
 } = adminApi;

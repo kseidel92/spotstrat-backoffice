@@ -98,6 +98,29 @@ button.on { background: #1f2d3a; border-color: var(--accent); }
 }
 .toolbar input { min-width: 220px; flex: 1; }
 
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 4px;
+}
+.pager-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+.pager-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pager-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .table-wrap {
   overflow: auto;
   border: 1px solid var(--line);

@@ -35,6 +35,7 @@ export default function Overview() {
         <Card label="Compras" value={money(o.purchases?.revenue_brl)} hint={`${o.purchases?.last_30d ?? 0} nos 30d`} />
         <Card label="Produção" value={money(o.production?.revenue_brl)} hint={`${o.production?.total ?? 0} pedidos`} />
         <Card label="Ajuda aberta" value={o.help?.open ?? '—'} hint={`${o.help?.total ?? 0} no total`} />
+        <Card label="Dúvidas do site" value={o.contact?.open ?? '—'} hint={`${o.contact?.total ?? 0} no total`} />
         <Card label="E-mails 7d" value={o.outbound7d?.total ?? '—'} hint={`${o.outbound7d?.sent ?? 0} enviados · ${o.outbound7d?.failed ?? 0} falha`} />
         <Card label="Cancelamentos" value={o.cancellations?.pending ?? '—'} hint={`${o.cancellations?.total ?? 0} no total`} />
       </div>

@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { useHelpQuery, useMessagesQuery, useOutboundQuery } from '../store';
+import { useContactQuery, useHelpQuery, useMessagesQuery, useOutboundQuery } from '../store';
 import { Err, Loading, StatusBadge, Table, when } from '../components';
 
 export default function Messages() {
   const [kind, setKind] = useState('');
   const outbound = useOutboundQuery({ kind });
   const help = useHelpQuery({});
+  const contact = useContactQuery({});
   const chat = useMessagesQuery();
-  const loading = outbound.isLoading || help.isLoading || chat.isLoading;
-  const error = outbound.error || help.error || chat.error;
+  const loading = outbound.isLoading || help.isLoading || contact.isLoading || chat.isLoading;
+  const error = outbound.error || help.error || contact.error || chat.error;
 
   const outCols = [
     { key: 'created_at', label: 'Quando', render: (r) => <span className="mono">{when(r.created_at)}</span> },
@@ -32,6 +33,14 @@ export default function Messages() {
     { key: 'user_email', label: 'Usuário', render: (r) => <span className="mono">{r.user_email}</span> },
     { key: 'strategy_name', label: 'Estratégia', render: (r) => r.strategy_name || '—' },
     { key: 'message', label: 'Mensagem', className: 'wrap-text', render: (r) => <div className="wrap-text">{r.message}</div> },
+    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+  ];
+  const contactCols = [
+    { key: 'created_at', label: 'Quando', render: (r) => <span className="mono">{when(r.created_at)}</span> },
+    { key: 'name', label: 'Nome', render: (r) => r.name || '—' },
+    { key: 'contact', label: 'Contato', render: (r) => <span className="mono">{r.contact}</span> },
+    { key: 'message', label: 'Mensagem', className: 'wrap-text', render: (r) => <div className="wrap-text">{r.message}</div> },
+    { key: 'page_path', label: 'Página', className: 'clip', render: (r) => <span className="mono clip">{r.page_path || '—'}</span> },
     { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const chatCols = [
@@ -60,6 +69,8 @@ export default function Messages() {
             </select>
           </div>
           <Table columns={outCols} rows={outbound.data?.messages || []} />
+          <h2 style={{ marginTop: 28 }}>Dúvidas do site (widget)</h2>
+          <Table columns={contactCols} rows={contact.data?.inquiries || []} />
           <h2 style={{ marginTop: 28 }}>Ajuda das estratégias</h2>
           <Table columns={helpCols} rows={help.data?.reports || []} />
           <h2 style={{ marginTop: 28 }}>Chat recente</h2>

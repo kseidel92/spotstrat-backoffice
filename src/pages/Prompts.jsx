@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePromptQuery, usePromptsQuery } from '../store';
-import { Err, Loading, StatusBadge, Table, when } from '../components';
+import { Err, Loading, Pager, StatusBadge, Table, useDebounced, when } from '../components';
+
+const PAGE_SIZE = 50;
 
 export function PromptDetail() {
   const { id } = useParams();
@@ -65,8 +67,17 @@ export default function Prompts() {
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
   const [bad, setBad] = useState(false);
-  const query = useMemo(() => ({ q, status, bad, limit: 80 }), [q, status, bad]);
-  const { data, isLoading, error, refetch, isFetching } = usePromptsQuery(query, { pollingInterval: 10000 });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const qDebounced = useDebounced(q, 300);
+
+  useEffect(() => { setPage(1); }, [qDebounced, status, bad, limit]);
+
+  const query = useMemo(
+    () => ({ q: qDebounced, status, bad, page, limit }),
+    [qDebounced, status, bad, page, limit],
+  );
+  const { data, isLoading, error, refetch, isFetching } = usePromptsQuery(query, { pollingInterval: 15000 });
 
   const columns = [
     {
@@ -125,17 +136,38 @@ export default function Prompts() {
           <option value="alarm">alarm</option>
           <option value="done">done</option>
         </select>
+        <select
+          value={String(limit)}
+          onChange={(e) => setLimit(Number(e.target.value))}
+          aria-label="Itens por página"
+        >
+          <option value="25">25 / pág.</option>
+          <option value="50">50 / pág.</option>
+          <option value="100">100 / pág.</option>
+        </select>
         <button type="button" className={bad ? 'on' : ''} onClick={() => { setBad((v) => !v); setStatus(''); }}>
           Só problemas
         </button>
         <button type="button" onClick={() => refetch()} disabled={isFetching}>
           {isFetching ? '…' : 'Atualizar'}
         </button>
-        <span className="badge muted">{data?.total ?? 0} total</span>
+        <span className="badge muted">{(data?.total ?? 0).toLocaleString('pt-BR')} total</span>
       </div>
       {isLoading ? <Loading /> : null}
       {error ? <Err error={error} /> : null}
-      {!isLoading && !error ? <Table columns={columns} rows={data?.prompts || []} /> : null}
+      {!isLoading && !error ? (
+        <>
+          <Table columns={columns} rows={data?.prompts || []} />
+          <Pager
+            page={data?.page ?? page}
+            pages={data?.pages ?? 1}
+            total={data?.total ?? 0}
+            limit={data?.limit ?? limit}
+            onPage={setPage}
+            disabled={isFetching}
+          />
+        </>
+      ) : null}
     </section>
   );
 }
