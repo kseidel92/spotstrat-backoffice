@@ -17,6 +17,19 @@ function cents(amount, currency) {
   }
 }
 
+function checkoutKind(r) {
+  if (r.kind === 'production') {
+    const name = r.strategy_name || r.strategy_id;
+    return name ? `produção · ${name}` : 'produção';
+  }
+  if (r.kind === 'plan') {
+    const tier = r.plan_tier || r.metadata?.tier || 'paper';
+    const m = r.plan_months || r.metadata?.months;
+    return m ? `plano ${tier} · ${m}m` : `plano ${tier}`;
+  }
+  return r.kind || '—';
+}
+
 export default function Payments() {
   const purchases = usePurchasesQuery();
   const production = useProductionOrdersQuery();
@@ -55,7 +68,8 @@ export default function Payments() {
   const checkoutCols = [
     { key: 'created_at', label: 'Quando', render: (r) => <span className="mono">{when(r.created_at)}</span> },
     { key: 'email', label: 'Usuário', render: (r) => <span className="mono">{r.email || '—'}</span> },
-    { key: 'kind', label: 'Tipo', render: (r) => r.kind },
+    { key: 'kind', label: 'Tipo', render: (r) => <span className="mono">{checkoutKind(r)}</span> },
+    { key: 'price_id', label: 'Price', render: (r) => <span className="mono">{r.price_id || '—'}</span> },
     { key: 'amount_total', label: 'Valor', render: (r) => cents(r.amount_total, r.currency) },
     { key: 'payment_status', label: 'Pagamento', render: (r) => <StatusBadge status={r.payment_status || r.status || '—'} /> },
     { key: 'fulfilled_at', label: 'Fulfill', render: (r) => (r.fulfilled_at ? <span className="mono">{when(r.fulfilled_at)}</span> : '—') },
@@ -75,12 +89,30 @@ export default function Payments() {
     { key: 'process_error', label: 'Erro', render: (r) => (r.process_error ? <span className="err">{r.process_error}</span> : 'ok') },
   ];
   const prodCols = [
-    { key: 'created_at', label: 'Quando', render: (r) => <span className="mono">{when(r.created_at)}</span> },
+    { key: 'paid_at', label: 'Pago em', render: (r) => <span className="mono">{when(r.paid_at || r.created_at)}</span> },
     { key: 'user_email', label: 'Usuário', render: (r) => <span className="mono">{r.user_email}</span> },
     { key: 'strategy_name', label: 'Estratégia', render: (r) => r.strategy_name },
-    { key: 'amount_brl', label: 'Valor', render: (r) => money(r.amount_brl) },
+    {
+      key: 'amount_brl',
+      label: 'Valor',
+      render: (r) => (
+        <span className="mono">
+          {money(r.amount_brl)} BRL
+          {r.currency && r.currency !== 'BRL' ? ` · ${r.local_amount} ${r.currency}` : ''}
+        </span>
+      ),
+    },
+    { key: 'provider', label: 'Provider', render: (r) => r.provider || 'stripe' },
+    {
+      key: 'stripe_payment_status',
+      label: 'Stripe',
+      render: (r) => (
+        <StatusBadge status={r.stripe_payment_status || (r.stripe_session_id ? 'paid' : '—')} />
+      ),
+    },
+    { key: 'ready_by', label: 'Pronto até', render: (r) => <span className="mono">{when(r.ready_by)}</span> },
     { key: 'stripe_session_id', label: 'Session', render: (r) => <span className="mono">{r.stripe_session_id || '—'}</span> },
-    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+    { key: 'status', label: 'Pedido', render: (r) => <StatusBadge status={r.status} /> },
   ];
   const cancelCols = [
     { key: 'requested_at', label: 'Quando', render: (r) => <span className="mono">{when(r.requested_at)}</span> },

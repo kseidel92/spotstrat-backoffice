@@ -53,7 +53,7 @@ export const adminApi = createApi({
     purchases: build.query({ query: () => '/purchases?limit=80', providesTags: ['Purchases'] }),
     stripeCheckouts: build.query({ query: () => '/stripe-checkouts?limit=80', providesTags: ['Stripe'] }),
     stripeEvents: build.query({ query: () => '/stripe-events?limit=80', providesTags: ['Stripe'] }),
-    productionOrders: build.query({ query: () => '/production-orders?limit=80' }),
+    productionOrders: build.query({ query: () => '/production-orders?limit=80', providesTags: ['Stripe'] }),
     cancellations: build.query({ query: () => '/cancellations?limit=80' }),
     outbound: build.query({
       query: ({ kind = '' } = {}) => {

@@ -33,7 +33,16 @@ export default function Overview() {
         <Card label="Prompts 24h" value={o.prompts?.last_24h ?? '—'} hint={`${o.prompts?.ok ?? 0} ok · ${o.prompts?.bad ?? 0} falha`} />
         <Card label="Fila" value={o.jobs?.queued ?? '—'} hint={`${o.jobs?.running ?? 0} running · ${o.jobs?.failed ?? 0} failed`} />
         <Card label="Compras" value={money(o.purchases?.revenue_brl)} hint={`${o.purchases?.last_30d ?? 0} nos 30d`} />
-        <Card label="Produção" value={money(o.production?.revenue_brl)} hint={`${o.production?.total ?? 0} pedidos`} />
+        <Card
+          label="Produção"
+          value={money(o.production?.revenue_brl)}
+          hint={`${o.production?.total ?? 0} pedidos · ${o.production?.last_30d ?? 0} em 30d`}
+        />
+        <Card
+          label="Stripe 30d"
+          value={o.stripe30d?.paid ?? '—'}
+          hint={`${o.stripe30d?.production ?? 0} prod · ${o.stripe30d?.plan ?? 0} plano · ${o.stripe30d?.unfulfilled_paid ?? 0} paid sem fulfill`}
+        />
         <Card label="Ajuda aberta" value={o.help?.open ?? '—'} hint={`${o.help?.total ?? 0} no total`} />
         <Card label="Dúvidas do site" value={o.contact?.open ?? '—'} hint={`${o.contact?.total ?? 0} no total`} />
         <Card label="E-mails 7d" value={o.outbound7d?.total ?? '—'} hint={`${o.outbound7d?.sent ?? 0} enviados · ${o.outbound7d?.failed ?? 0} falha`} />
